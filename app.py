@@ -212,7 +212,7 @@ def create_dashboard():
                 battery_soc = latest_data['battery_soc'].iloc[0]
                 current_time = datetime.now()
                
-                if (battery_soc < 35 and
+                if (battery_soc < 20 and
                     current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
                     alert_sent = send_low_battery_alert(
                         latest_data['latitude'].iloc[0],
@@ -269,10 +269,8 @@ def login():
         page_icon="🚗",
         layout="wide"
     )
-    st.empty()
     st.title("🚗 EV Vehicle Monitor")
-    st.divider()
-    st.subheader("🔐 Login to EV Monitor")
+    st.text("🔐 Login to EV Monitor")
 
 
     if "authenticated" not in st.session_state:
