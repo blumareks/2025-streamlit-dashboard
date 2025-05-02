@@ -41,14 +41,14 @@ DATABASE_URL = URI #"postgresql://username:password@localhost:5432/your_database
 def init_db():
     return create_engine(DATABASE_URL)
 
-def send_low_battery_alert(lat, lon, direction, battery_level):
+def send_low_battery_alert(lat, lon, direction, battery_soc):
     """Send alert to external service when battery is low"""
     try:
         payload = {
             "latitude": lat,
             "longitude": lon,
             "direction": direction,
-            "battery_percentage": battery_level,
+            "battery_percentage": battery_soc,
             "timestamp": datetime.now().isoformat()
         }
 
@@ -59,7 +59,7 @@ def send_low_battery_alert(lat, lon, direction, battery_level):
        
         response = requests.post(ALERT_API_URL, headers=headers, json=payload)
         response.raise_for_status()
-        logger.info(f"Successfully sent low battery alert for battery level: {battery_level}%")
+        logger.info(f"Successfully sent low battery alert for battery soc: {battery_soc}%")
         return True
    
     except requests.RequestException as e:
@@ -92,8 +92,7 @@ def get_historical_data(engine, hours=1):
 def create_dashboard():
     
     st.empty()
-    st.title("🚗 EV Vehicle Monitor")
-   
+       
     # Initialize database connection
     engine = init_db()
    
@@ -114,8 +113,8 @@ def create_dashboard():
                 # Display main metrics
                 with col1:
                     st.metric(
-                        "Battery Level",
-                        f"{latest_data['battery_level'].iloc[0]}%",
+                        "Battery SOC",
+                        f"{latest_data['battery_soc'].iloc[0]}%",
                         delta=None
                     )
                
@@ -141,12 +140,12 @@ def create_dashboard():
                 historical_data = get_historical_data(engine)
                 print(historical_data)
                 with col_left:
-                    # Battery level over time
+                    # Battery SOC over time
                     fig_battery = px.line(
                         historical_data,
                         x='timestamp',
-                        y='battery_level',
-                        title='Battery Level Over Time'
+                        y='battery_soc',
+                        title='Battery SOC Over Time'
                     )
                     st.plotly_chart(fig_battery, use_container_width=True)
                    
@@ -209,22 +208,22 @@ def create_dashboard():
                     })
                     st.table(location_details)
                
-                # Check battery level and send alert if necessary
-                battery_level = latest_data['battery_level'].iloc[0]
+                # Check battery soc and send alert if necessary
+                battery_soc = latest_data['battery_soc'].iloc[0]
                 current_time = datetime.now()
                
-                if (battery_level < 35 and
+                if (battery_soc < 35 and
                     current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
                     alert_sent = send_low_battery_alert(
                         latest_data['latitude'].iloc[0],
                         latest_data['longitude'].iloc[0],
                         latest_data['direction'].iloc[0],
-                        battery_level
+                        battery_soc
                     )
                    
                     if alert_sent:
                         st.session_state.last_alert_time = current_time
-                        st.warning(f"⚠️ Low battery alert sent! Battery level: {battery_level}%")
+                        st.warning(f"⚠️ Low battery alert sent! Battery SOC: {battery_soc}%")
                
                 # Display last update time
                 st.text(f"Last updated: {latest_data['timestamp'].iloc[0]}")
