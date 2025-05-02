@@ -216,7 +216,7 @@ def create_dashboard():
                 battery_level = latest_data['battery_level'].iloc[0]
                 current_time = datetime.now()
                
-                if (battery_level < 20 and
+                if (battery_level < 35 and
                     current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
                     alert_sent = send_low_battery_alert(
                         latest_data['latitude'].iloc[0],
