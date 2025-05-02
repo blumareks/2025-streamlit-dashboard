@@ -244,7 +244,7 @@ def create_dashboard():
                     if confirm_text.strip().lower() == "yes delete all":
                         try:
                             with engine.connect() as connection:
-                                connection.execute("DELETE FROM vehicle_data")
+                                connection.execute(text("DELETE FROM vehicle_data"))
                                 connection.commit()
                             st.success("✅ All data deleted successfully.")
                         except Exception as e:
