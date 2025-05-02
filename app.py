@@ -23,7 +23,7 @@ PASSWORD = os.getenv("STREAMLIT_PASSWORD", "ibmthink2025")
 
 # Alert Service API configuration
 ALERT_API_URL = os.getenv("ALERT_API_URL")
-X-API-KEY = os.getenv("x-api-key")
+X_API_KEY = os.getenv("x-api-key")
 
 # Set up logging
 logging.basicConfig(
@@ -52,7 +52,7 @@ def send_low_battery_alert(lat, lon, direction, battery_level):
         }
 
         headers = {
-          'x-api-key': X-API-KEY,
+          'x-api-key': X_API_KEY,
           'Content-Type': 'application/json'
   }
        
