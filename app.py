@@ -89,12 +89,8 @@ def get_historical_data(engine, hours=1):
 
 
 def create_dashboard():
-    st.set_page_config(
-        page_title="EV Vehicle Monitor",
-        page_icon="🚗",
-        layout="wide"
-    )
-   
+    
+    st.empty()
     st.title("🚗 EV Vehicle Monitor")
    
     # Initialize database connection
@@ -268,7 +264,14 @@ def create_dashboard():
 
 
 def login():
+    st.set_page_config(
+        page_title="EV Vehicle Monitor",
+        page_icon="🚗",
+        layout="wide"
+    )
+    
     st.title("🔐 Login to EV Monitor")
+
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
