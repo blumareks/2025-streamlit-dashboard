@@ -1,0 +1,7 @@
+streamlit
+pandas
+requests
+sqlalchemy
+plotly
+plotly-express
+python-dotenv
