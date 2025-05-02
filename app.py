@@ -5,6 +5,7 @@ import pandas as pd
 import time
 import requests
 from sqlalchemy import create_engine
+from sqlalchemy import text
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
