@@ -269,8 +269,10 @@ def login():
         page_icon="🚗",
         layout="wide"
     )
-    
-    st.title("🔐 Login to EV Monitor")
+    st.empty()
+    st.title("🚗 EV Vehicle Monitor")
+    st.divider()
+    st.subheader("🔐 Login to EV Monitor")
 
 
     if "authenticated" not in st.session_state:
@@ -292,6 +294,7 @@ def login():
                     st.error("Invalid username or password")
         return False
     else:
+        st.empty()
         return True
 
 if __name__ == "__main__":
