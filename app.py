@@ -18,7 +18,11 @@ load_dotenv()
 
 # Retrieve the database configuration from the environment
 URI = os.getenv("URL")
+
+# Alert Service API configuration
 ALERT_API_URL = os.getenv("ALERT_API_URL")
+X-API-KEY = os.getenv("x-api-key")
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -28,9 +32,6 @@ logger = logging.getLogger(__name__)
 
 # Database configuration
 DATABASE_URL = URI #"postgresql://username:password@localhost:5432/your_database"
-
-# Alert Service API configuration
-#ALERT_API_URL = "YOUR_ALERT_SERVICE_ENDPOINT"
 
 # Initialize database connection
 @st.cache_resource
@@ -47,8 +48,13 @@ def send_low_battery_alert(lat, lon, direction, battery_level):
             "battery_percentage": battery_level,
             "timestamp": datetime.now().isoformat()
         }
+
+        headers = {
+          'x-api-key': X-API-KEY,
+          'Content-Type': 'application/json'
+  }
        
-        response = requests.post(ALERT_API_URL, json=payload)
+        response = requests.post(ALERT_API_URL, headers=headers, json=payload)
         response.raise_for_status()
         logger.info(f"Successfully sent low battery alert for battery level: {battery_level}%")
         return True
