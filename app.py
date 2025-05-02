@@ -18,6 +18,8 @@ load_dotenv()
 
 # Retrieve the database configuration from the environment
 URI = os.getenv("URL")
+USERNAME = os.getenv("STREAMLIT_USERNAME", "admin")
+PASSWORD = os.getenv("STREAMLIT_PASSWORD", "ibmthink2025")
 
 # Alert Service API configuration
 ALERT_API_URL = os.getenv("ALERT_API_URL")
@@ -174,10 +176,26 @@ def create_dashboard():
                         zoom=13,
                         title='Vehicle Location'
                     )
+                    # fig_map.update_layout(
+                    #     mapbox_style="open-street-map",
+                    #     margin={"r":0,"t":30,"l":0,"b":0}
+                    # )
+                    direction = latest_data['direction'].iloc[0]
+                    latitude = latest_data['latitude'].iloc[0]
+                    longitude = latest_data['longitude'].iloc[0]
+
                     fig_map.update_layout(
-                        mapbox_style="open-street-map",
-                        margin={"r":0,"t":30,"l":0,"b":0}
+                        mapbox=dict(
+                            style="open-street-map",
+                            zoom=13,
+                            center=dict(lat=latitude, lon=longitude),
+                            bearing=direction  # Rotate the map based on vehicle heading
+                        ),
+                        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+                        title="Vehicle Location and Heading"
                     )
+                    
+
                     st.plotly_chart(fig_map, use_container_width=True)
                    
                     # Location details
@@ -217,6 +235,27 @@ def create_dashboard():
             else:
                 st.error("No data available from the database")
            
+            
+            st.divider()
+            st.subheader("🧹 Maintenance")
+
+            with st.expander("Danger Zone: Delete All Historical Data"):
+                st.warning("This will delete **all records** from the database table `vehicle_data`.")
+
+                confirm_text = st.text_input("Type **yes delete all** to confirm")
+
+                if st.button("Delete All Data"):
+                    if confirm_text.strip().lower() == "yes delete all":
+                        try:
+                            with engine.connect() as connection:
+                                connection.execute("DELETE FROM vehicle_data")
+                                connection.commit()
+                            st.success("✅ All data deleted successfully.")
+                        except Exception as e:
+                            st.error(f"Failed to delete data: {e}")
+                    else:
+                        st.error("You must type exactly: **yes delete all**")
+
             # Sleep for 15 seconds
             time.sleep(15)
             st.rerun()
@@ -228,6 +267,30 @@ def create_dashboard():
             st.rerun()
 
 
+def login():
+    st.title("🔐 Login to EV Monitor")
+
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    if not st.session_state.authenticated:
+        with st.form("Login Form", clear_on_submit=True):
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Login")
+
+            if submitted:
+                if username == USERNAME and password == PASSWORD:
+                    st.session_state.authenticated = True
+                    st.success("Logged in successfully!")
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
+        return False
+    else:
+        return True
+
 if __name__ == "__main__":
-    create_dashboard()
-    
+    if login():
+        create_dashboard()
