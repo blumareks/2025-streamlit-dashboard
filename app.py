@@ -25,6 +25,8 @@ PASSWORD = os.getenv("STREAMLIT_PASSWORD", "ibmthink2025")
 # Alert Service API configuration
 ALERT_API_URL = os.getenv("ALERT_API_URL")
 X_API_KEY = os.getenv("x-api-key")
+WXA_SCRIPT = os.getenv("WXA_SCRIPT")
+
 
 # Set up logging
 logging.basicConfig(
@@ -270,6 +272,13 @@ def login():
         layout="wide"
     )
     st.title("🚗 EV Vehicle Monitor")
+    
+    # Inject JavaScript from watsonx.assistant using markdown
+    st.markdown(
+        WXA_SCRIPT,
+        unsafe_allow_html=True
+    )
+    
     st.text("🔐 Login to EV Monitor")
 
 
