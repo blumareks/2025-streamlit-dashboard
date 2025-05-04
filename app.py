@@ -92,7 +92,13 @@ def get_historical_data(engine, hours=1):
 
 
 def create_dashboard():
-    
+    # Inject JavaScript from watsonx.assistant using markdown
+    st.markdown(
+        WXA_SCRIPT,
+        unsafe_allow_html=True
+    )
+    logger.info(f"Successfully injected java script {WXA_SCRIPT}")
+        
     st.empty()
        
     # Initialize database connection
@@ -272,13 +278,7 @@ def login():
         layout="wide"
     )
     st.title("🚗 EV Vehicle Monitor")
-    
-    # Inject JavaScript from watsonx.assistant using markdown
-    st.markdown(
-        WXA_SCRIPT,
-        unsafe_allow_html=True
-    )
-    
+
     st.text("🔐 Login to EV Monitor")
 
 
