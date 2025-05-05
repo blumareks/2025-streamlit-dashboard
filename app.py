@@ -1,4 +1,5 @@
 #20250502 Marek Sadowski for Think 2025
+#20250505 Marek Sadowski increased frequency to every 10 sec
 
 import streamlit as st
 import pandas as pd
@@ -21,6 +22,7 @@ load_dotenv()
 URI = os.getenv("URL")
 USERNAME = os.getenv("STREAMLIT_USERNAME", "admin")
 PASSWORD = os.getenv("STREAMLIT_PASSWORD", "ibmthink2025")
+FREQUENCY = os.getenv("STREAMLIT_FREQUENCY", 10)
 
 # Alert Service API configuration
 ALERT_API_URL = os.getenv("ALERT_API_URL")
@@ -108,16 +110,34 @@ def create_dashboard():
     if 'last_alert_time' not in st.session_state:
         st.session_state.last_alert_time = datetime.min
    
-    # Create three columns for the main metrics
-    col1, col2, col3 = st.columns(3)
-   
+       
     while True:
         try:
             print("Getting latest data")
             # Get latest data
             latest_data = get_latest_data(engine)
             print(latest_data)
+            refresh_time = FREQUENCY
             if not latest_data.empty:
+                # alert
+                if (battery_soc < 20 and
+                    current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
+                    alert_sent = send_low_battery_alert(
+                        latest_data['latitude'].iloc[0],
+                        latest_data['longitude'].iloc[0],
+                        latest_data['direction'].iloc[0],
+                        battery_soc
+                    )
+                   
+                    if alert_sent:
+                        st.session_state.last_alert_time = current_time
+                        st.warning(f"⚠️ Low battery alert sent! Battery SOC: {battery_soc}%")
+                        refresh_time = 30
+
+
+                # Create three columns for the main metrics
+                col1, col2, col3 = st.columns(3)
+
                 # Display main metrics
                 with col1:
                     st.metric(
@@ -220,19 +240,7 @@ def create_dashboard():
                 battery_soc = latest_data['battery_soc'].iloc[0]
                 current_time = datetime.now()
                
-                if (battery_soc < 20 and
-                    current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
-                    alert_sent = send_low_battery_alert(
-                        latest_data['latitude'].iloc[0],
-                        latest_data['longitude'].iloc[0],
-                        latest_data['direction'].iloc[0],
-                        battery_soc
-                    )
-                   
-                    if alert_sent:
-                        st.session_state.last_alert_time = current_time
-                        st.warning(f"⚠️ Low battery alert sent! Battery SOC: {battery_soc}%")
-               
+                
                 # Display last update time
                 st.text(f"Last updated: {latest_data['timestamp'].iloc[0]}")
            
@@ -260,10 +268,10 @@ def create_dashboard():
                     else:
                         st.error("You must type exactly: **yes delete all**")
 
-            # Sleep for 15 seconds
-            time.sleep(15)
+            # Sleep for 10 seconds - refresh_time
+            time.sleep(refresh_time)
             st.rerun()
-            #st.experimental_rerun()
+            
         except Exception as e:
             logger.error(f"Error updating dashboard: {e}")
             st.error(f"Error updating dashboard: {str(e)}")
