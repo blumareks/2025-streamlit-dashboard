@@ -119,6 +119,10 @@ def create_dashboard():
             print(latest_data)
             refresh_time = FREQUENCY
             if not latest_data.empty:
+                # Check battery soc and send alert if necessary
+                battery_soc = latest_data['battery_soc'].iloc[0]
+                current_time = datetime.now()
+                
                 # alert
                 if (battery_soc < 20 and
                     current_time - st.session_state.last_alert_time > timedelta(minutes=5)):
@@ -236,10 +240,7 @@ def create_dashboard():
                     })
                     st.table(location_details)
                
-                # Check battery soc and send alert if necessary
-                battery_soc = latest_data['battery_soc'].iloc[0]
-                current_time = datetime.now()
-               
+                            
                 
                 # Display last update time
                 st.text(f"Last updated: {latest_data['timestamp'].iloc[0]}")
